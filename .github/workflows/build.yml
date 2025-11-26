@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   build_kernel:
@@ -19,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: ${{ github.event.inputs.arm == 'true' && fromJSON('["aarch64"]') || fromJSON('["aarch64", "x86_64"]') }}
+        arch: ${{ github.event.inputs.arm == 'true' && fromJSON('["aarch64"]') || fromJSON('["x86_64"]') }}
         fedora_version: [42]
         # exclude:
         #   - arch: aarch64
@@ -66,7 +67,7 @@ jobs:
             --name kernel --namespace rpms --release "f${FEDORA_VERSION:-41}" \
             local --arch ${ARCH:-x86_64} --with baseonly \
             --builddir build --buildrootdir buildroot
-      
+
       - name: Print ccache stats
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
         run: |
@@ -95,7 +96,7 @@ jobs:
             .build-*.log
             debuginfo/*.rpm
           compression-level: 7
-      
+
       - name: Convert to Arch
         if: matrix.arch == 'x86_64' && matrix.fedora_version == 41 #arch_fedora
         run: |
@@ -107,7 +108,7 @@ jobs:
             sed "s/VERSION_FEDORA/${KERNEL_VER}.x86_64/" | \
             sed "s/VERSION_TAG/${ARCH_VER}/" \
             > x86_64/PKGBUILD
-          sudo podman build . -f Dockerfile-arch --tag 'arch_builder' --build-arg UID=$(id -u) --build-arg GID=$(id -g) 
+          sudo podman build . -f Dockerfile-arch --tag 'arch_builder' --build-arg UID=$(id -u) --build-arg GID=$(id -g)
           sudo podman run --rm -v $(pwd)/x86_64:/workspace arch_builder makepkg -s
 
       - name: Upload Kernel arch package to action
@@ -167,9 +168,9 @@ jobs:
         run: |
           repo_owner="ublue-os"
           repo_name="akmods"
-          event_type="bazzite-kernel-build" 
+          event_type="bazzite-kernel-build"
           release_tag="${{ github.event.release.tag_name }}"
-  
+
           curl -L \
             -X POST \
             -H "Accept: application/vnd.github+json" \
