@@ -25,7 +25,7 @@ jobs:
         # exclude:
         #   - arch: aarch64
         #     fedora_version: 41
-    runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04:20250615.1.0' }}
 
     steps:
       - name: Maximize build space
