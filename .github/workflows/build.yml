@@ -25,7 +25,7 @@ jobs:
         # exclude:
         #   - arch: aarch64
         #     fedora_version: 41
-    runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04:20250615.1.0' }}
+    runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
 
     steps:
       - name: Maximize build space
@@ -43,13 +43,14 @@ jobs:
           key: ccache-${{ matrix.arch }}-${{ github.sha }}
           restore-keys: |
             ccache-${{ matrix.arch }}
-
+      - name: Set Rust Version
+        run: rustup override set 1.87.0
       - name: Create Build Environment
         run: |
           FEDORA_VERSION="${{ matrix.fedora_version }}"
           sudo podman build . --tag 'fedora_builder' \
             --build-arg UID=$(id -u) --build-arg GID=$(id -g) \
-            --build-arg FEDORA_VERSION=${FEDORA_VERSION:-41}
+            --build-arg FEDORA_VERSION=${FEDORA_VERSION:-42}
       - name: Write Changelog
         run: |
           sudo podman run --rm -v $(pwd):/workspace fedora_builder \
@@ -64,7 +65,7 @@ jobs:
             --env CCACHE_MAXSIZE=5G \
             --env CCACHE_COMPRESS=1 \
             fedora_builder fedpkg \
-            --name kernel --namespace rpms --release "f${FEDORA_VERSION:-41}" \
+            --name kernel --namespace rpms --release "f${FEDORA_VERSION:-42}" \
             local --arch ${ARCH:-x86_64} --with baseonly \
             --builddir build --buildrootdir buildroot
 
