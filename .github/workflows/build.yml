@@ -44,7 +44,7 @@ jobs:
           restore-keys: |
             ccache-${{ matrix.arch }}
       - name: Set Rust Version
-        run: rustup override set 1.87.0
+        run: rustup override set 1.87.0 && rustc --print target-list
       - name: Create Build Environment
         run: |
           FEDORA_VERSION="${{ matrix.fedora_version }}"
